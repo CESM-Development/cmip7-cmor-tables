@@ -1131,7 +1131,9 @@
             }
         },
         "grid_label": {
-            "g99": "Demo entry - do not use"
+            "g99": "Demo entry - do not use",
+	    "gn": "Native model grid",
+	    "gr": "regridded"
         },
         "horizontal_label": {
             "hm": "Data reported as a mean over some horizontal area.",
@@ -1146,6 +1148,7 @@
             "^i[[:digit:]]\\{1,\\}$"
         ],
         "institution_id": {
+	    "NCAR" : "National Center for Atmospheric Research",
             "CCCma": "Environment and Climate Change Canada",
             "CNRM-CERFACS": "CNRM (Centre National de Recherches Meteorologiques, Toulouse 31057, France), CERFACS (Centre Europeen de Recherche et de Formation Avancee en Calcul Scientifique, Toulouse 31057, France)",
             "IPSL": "Institut Pierre-Simon Laplace",
@@ -1240,6 +1243,14 @@
             "vertical_label"
         ],
         "source_id": {
+	    "CESM3": {
+		"institution_id": [
+		    "NCAR"
+		],
+		"model_component": {},
+		"source": "CESM3:",
+		"source_id": "CESM3"
+	    },
             "CanESM6-MR": {
                 "institution_id": [
                     "CCCma"
