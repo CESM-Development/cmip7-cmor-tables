@@ -1152,7 +1152,8 @@
             "CCCma": "Environment and Climate Change Canada",
             "CNRM-CERFACS": "CNRM (Centre National de Recherches Meteorologiques, Toulouse 31057, France), CERFACS (Centre Europeen de Recherche et de Formation Avancee en Calcul Scientifique, Toulouse 31057, France)",
             "IPSL": "Institut Pierre-Simon Laplace",
-            "MOHC": "Met Office Hadley Centre"
+            "MOHC": "Met Office Hadley Centre",
+            "NCC": "NorESM Climate modeling Consortium consisting of CICERO (Center for International Climate and Environmental Research, Oslo 0349), MET-Norway (Norwegian Meteorological Institute, Oslo 0313), NERSC (Nansen Environmental and Remote Sensing Center, Bergen 5006), NILU (Norwegian Institute for Air Research, Kjeller 2027), UiB (University of Bergen, Bergen 5007), UiO (University of Oslo, Oslo 0313) and UNI (Uni Research, Bergen 5008), Norway. Mailing address: NCC, c/o MET-Norway, Henrik Mohns plass 1, Oslo 0313, Norway"
         },
         "license": {
             "license_id": {
@@ -1243,14 +1244,14 @@
             "vertical_label"
         ],
         "source_id": {
-	    "CESM3": {
-		"institution_id": [
-		    "NCAR"
-		],
-		"model_component": {},
-		"source": "CESM3:",
-		"source_id": "CESM3"
-	    },
+            "CESM3": {
+            "institution_id": [
+                    "NCAR"
+                ],
+                "model_component": {},
+                "source": "CESM3:",
+                "source_id": "CESM3"
+            },
             "CanESM6-MR": {
                 "institution_id": [
                     "CCCma"
@@ -1266,6 +1267,14 @@
                 "model_component": {},
                 "source": "UKESM1-0-LL:",
                 "source_id": "UKESM1-0-LL"
+            },
+            "NorESM3": {
+                "institution_id": [
+                    "NCC"
+                ],
+                "model_component": {},
+                "source": "NorESM3:",
+                "source_id": "NorESM3"
             }
         },
         "temporal_label": {
