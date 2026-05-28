@@ -47,7 +47,7 @@ GENERIC_LEVELS = {
 TIMESTAMP = datetime.datetime.today().strftime("%Y-%m-%d %T")
 TABLE_TEMPLATE = {
     "Header": {
-        "Conventions": "CF-1.12 CMIP-7.0",
+        "Conventions": "CF-1.12",
         "checksum": "to be calculated",
         "cmor_version": "3.13",
         "generic_levels": "",
@@ -257,14 +257,20 @@ def dr_coord_to_cmor_dict(coord):
         cmor_coord['must_have_bounds'] = "yes"
     else:
         cmor_coord['must_have_bounds'] = "no"
+
+    if cmor_coord['climatology']:
+        cmor_coord['climatology'] = "yes"
+    else:
+        cmor_coord['climatology'] = ""
+
     # deal with lists
     if cmor_coord['requested']:
         try:
-            cmor_coord['requested'] = ['{:.1f}'.format(float(i)) for i in cmor_coord['requested'].split()]
+            cmor_coord['requested'] = [str(float(i)) for i in cmor_coord['requested'].split()]
         except ValueError:
-            cmor_coord['requested'] = ''
+            cmor_coord['requested'] = [str(i) for i in cmor_coord['requested'].split()]
     if cmor_coord['requested_bounds']:
-        cmor_coord['requested_bounds'] = ['{:.1f}'.format(float(i)) for i in cmor_coord['requested_bounds'].split()]
+        cmor_coord['requested_bounds'] = [str(float(i)) for i in cmor_coord['requested_bounds'].split()]
 
     # convert numbers to strings (even if they are zero)
     for i in ['tolerance', 'valid_max', 'valid_min']:
