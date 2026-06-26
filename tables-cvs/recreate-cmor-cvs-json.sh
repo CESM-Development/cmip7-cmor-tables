@@ -1,4 +1,10 @@
 #!/bin/bash
+# Handy trick (full details here https://gist.github.com/mohanpedala/1e2ff5661761d3abd0385e8223e16425?permalink_comment_id=3799230):
+# -e: exit immediately if any command fails
+# -u: exit if you reference any unset variable
+# -o: pipefail means that a non-zero exit code is returned if any command in the script fails
+set -euo pipefail
+
 # Create the CMOR CVs JSON file
 #
 # Works in the currently activated environment,
@@ -8,6 +14,7 @@
 # Options:
 #
 # -o: file in which to write the output (deafult: cmor-cvs.json)
+# -p: directory in which to write the split view of the output (default: split-view)
 # -r: file from which to read the requirements (default: requirements-cmor-cvs-table.txt)
 # -e: install dependencies before creating the file
 # -v: verbose mode
@@ -17,34 +24,42 @@
 
 # Environment variables that this file uses.
 # If they're not set, the default values are used.
-# Note: the defaults below are working values.
-# In future, we should switch to the commented out lines further below.
 ESGVOC_FORK="${ESGVOC_FORK:=ESGF}"
-ESGVOC_REVISION="${ESGVOC_REVISION:=69fbc48}"
-UNIVERSE_CVS_FORK="${UNIVERSE_CVS_FORK:=WCRP-CMIP}"
-UNIVERSE_CVS_BRANCH="${UNIVERSE_CVS_BRANCH:=esgvoc_dev}"
-CMIP7_CVS_FORK="${CMIP7_CVS_FORK:=WCRP-CMIP}"
-CMIP7_CVS_BRANCH="${CMIP7_CVS_BRANCH:=esgvoc_dev}"
-# ESGVOC_FORK="${ESGVOC_FORK:=ESGF}"
-# ESGVOC_REVISION="${ESGVOC_REVISION:=}" # vTBD
-# UNIVERSE_CVS_FORK="${UNIVERSE_CVS_FORK:=WCRP-CMIP}"
-# UNIVERSE_CVS_BRANCH="${UNIVERSE_CVS_BRANCH:=esgvoc}"
+ESGVOC_REVISION="${ESGVOC_REVISION:=4.1.2}"
+### Non-versioned esgvoc config
+# # Use when we are using a branches of CVs
+# esgvoc_versioned=0
+# # UNIVERSE_CVS_FORK="${UNIVERSE_CVS_FORK:=WCRP-CMIP}"
+# # UNIVERSE_CVS_REF="${UNIVERSE_CVS_REF:=esgvoc_dev}"
+# UNIVERSE_CVS_FORK="${UNIVERSE_CVS_FORK:=znichollscr}"
+# UNIVERSE_CVS_REF="${UNIVERSE_CVS_REF:=add-dcpp-entries}"
 # CMIP7_CVS_FORK="${CMIP7_CVS_FORK:=WCRP-CMIP}"
-# CMIP7_CVS_BRANCH="${CMIP7_CVS_BRANCH:=esgvoc}"
+# CMIP7_CVS_REF="${CMIP7_CVS_REF:=esgvoc_dev}"
+# # CMIP7_CVS_REF="${CMIP7_CVS_REF:=latest-fixes}"
+
+# Versioned esgvoc config
+# Use when we are using a versioned esgvoc release
+esgvoc_versioned=1
+ESGVOC_CMIP7_DB_VERSION="${ESGVOC_CMIP7_DB_VERSION:=latest}"
+# ESGVOC_CMIP7_DB_VERSION="${ESGVOC_CMIP7_DB_VERSION:=dev-latest}"
 
 verbose=0
 install_env=0
 out_file='cmor-cvs.json'
+out_path_split_view="split-view"
 requirements_file='requirements-cmor-cvs-table.txt'
+generation_script='generate-cmor-cvs-table.py'
 
-while getopts "o:r:ve" OPTION; do
+while getopts "o:d:r:s:ve" OPTION; do
     case $OPTION in
     o) out_file="${OPTARG}" ;;
+    d) out_path_split_view="${OPTARG}" ;;
     r) requirements_file="${OPTARG}" ;;
+    s) generation_script="${OPTARG}" ;;
     v) verbose=1 ;;
     e) install_env=1 ;;
     *)
-        echo "usage: $0 [-v] [-e] [-o output-file]" >&2
+        echo "usage: $0 [-v] [-e] [-o output-file] [-d out-path-split-view] [-r requirements-file] [-s generation-script]" >&2
         exit 1
         ;;
     esac
@@ -60,36 +75,51 @@ if [[ $install_env -eq 1 ]]; then
 
     log "ESGVOC_FORK=$ESGVOC_FORK"
     log "ESGVOC_REVISION=$ESGVOC_REVISION"
-    log "UNIVERSE_CVS_FORK=$UNIVERSE_CVS_FORK"
-    log "UNIVERSE_CVS_BRANCH=$UNIVERSE_CVS_BRANCH"
-    log "CMIP7_CVS_FORK=$CMIP7_CVS_FORK"
-    log "CMIP7_CVS_BRANCH=$CMIP7_CVS_BRANCH"
 
-    log "out_file=$out_file"
     log "requirements_file=$requirements_file"
 
-    sed -i -E -e 's#(.*)/github.com/.*/(.*)#\1/github.com/'"${ESGVOC_FORK}"'/\2#' "${requirements_file}"
-    sed -i -E -e 's#(.*)/esgf-vocab.git@.*#\1/esgf-vocab.git@'"${ESGVOC_REVISION}"'#' "${requirements_file}"
-    # # Mac equivalent of the above
-    # sed -i -E -e 's#\(.*\)/github.com/.*/\(.*\)#\1/github.com/'"${ESGVOC_FORK}"'/\2#' "${requirements_file}"
-    # sed -i -E -e 's#\(.*\)/esgf-vocab.git@.*#\1/esgf-vocab.git@'"${ESGVOC_REVISION}"'#' "${requirements_file}"
+    if [[ "$(uname)" == "Darwin" ]]; then
+        sed_platform_specific_args=(-i '')
+    else
+        sed_platform_specific_args=(-i)
+    fi
+
+    sed "${sed_platform_specific_args[@]}" -e 's#\(.*\)/github.com/.*/\(.*\)#\1/github.com/'"${ESGVOC_FORK}"'/\2#' "${requirements_file}"
+    sed "${sed_platform_specific_args[@]}" -e 's#\(.*\)/esgf-vocab.git@.*#\1/esgf-vocab.git@'"${ESGVOC_REVISION}"'#' "${requirements_file}"
 
     pip install -r "${requirements_file}"
 
-    esgvoc config create cmip7-cvs-ci
-    esgvoc config switch cmip7-cvs-ci
+    if [[ $esgvoc_versioned -eq 1 ]]; then
 
-    esgvoc config remove-project -f cmip6
-    esgvoc config remove-project -f cmip6plus
-    esgvoc config remove-project -f cmip7
+        echo "Using versioned esgvoc"
+        log "ESGVOC_CMIP7_DB_VERSION=$ESGVOC_CMIP7_DB_VERSION"
+        esgvoc use "cmip7@${ESGVOC_CMIP7_DB_VERSION}"
 
-    esgvoc config set "universe:github_repo=https://github.com/$UNIVERSE_CVS_FORK/WCRP-universe" "universe:branch=$UNIVERSE_CVS_BRANCH"
-    esgvoc config add-project cmip7 --custom --repo "https://github.com/$CMIP7_CVS_FORK/CMIP7-CVs" --branch "$CMIP7_CVS_BRANCH"
+    else
 
-    esgvoc install
+        echo "Using non-versioned esgvoc"
+        log "UNIVERSE_CVS_FORK=$UNIVERSE_CVS_FORK"
+        log "UNIVERSE_CVS_REF=$UNIVERSE_CVS_REF"
+        log "CMIP7_CVS_FORK=$CMIP7_CVS_FORK"
+        log "CMIP7_CVS_REF=$CMIP7_CVS_REF"
+
+        esgvoc admin build \
+            --project-repo "https://github.com/${CMIP7_CVS_FORK}/CMIP7-CVs" \
+            --project-ref "${CMIP7_CVS_REF}" \
+            --universe-repo "https://github.com/${UNIVERSE_CVS_FORK}/WCRP-universe" \
+            --universe-ref "${UNIVERSE_CVS_REF}" \
+            --project-id cmip7 \
+            --cv-version dev \
+            --universe-version dev \
+            --output /tmp/cmip7.db
+
+        esgvoc admin install cmip7 /tmp/cmip7.db --name local --activate
+
+    fi
 
 fi
 
-esgvoc cmor-export-cvs-table --out-path "${out_file}"
-
-log "Wrote output to ${out_file}"
+log "generation_script=$generation_script"
+log "out_file=$out_file"
+log "out_path_split_view=$out_path_split_view"
+python "${generation_script}" --out-path "${out_file}" --out-path-split-view "${out_path_split_view}" && log "Wrote output to ${out_file} and split view to ${out_path_split_view}"

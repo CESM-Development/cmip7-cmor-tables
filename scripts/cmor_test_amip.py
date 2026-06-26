@@ -12,12 +12,10 @@ DATASET_INFO = {
     "_cmip7_option": 1,
     "_controlled_vocabulary_file": "tables-cvs/cmor-cvs.json",
     "activity_id": "CMIP",
-    "branch_time_in_child": 30.0,
-    "branch_time_in_parent": 10800.0,
     "calendar": "360_day",
     "drs_specs": "MIP-DRS7",
     "data_specs_version": "MIP-DS7.1.0.0",
-    "experiment_id": "1pctCO2",
+    "experiment_id": "amip",
     "forcing_index": "f3",
     "grid_label": "g999",
     "initialization_index": "i1",
@@ -25,12 +23,6 @@ DATASET_INFO = {
     "license_id": "CC-BY-4.0",
     "nominal_resolution": "100 km",
     "outpath": ".",
-    "parent_mip_era": "CMIP7",
-    "parent_time_units": "days since 1850-01-01",
-    "parent_activity_id": "CMIP",
-    "parent_source_id": "DUMMY-MODEL",
-    "parent_experiment_id": "piControl",
-    "parent_variant_label": "r1i1p1f3",
     "physics_index": "p1",
     "realization_index": "r9",
     "source_id": "DUMMY-MODEL",
@@ -99,7 +91,7 @@ def main():
         cell_measures = json.load(fh)
 
     # Check that cell_measures are valid ( option flags need to be manually replaced )
-    variable_cell_measures = cell_measures['cell_measures'].get(cmip7_compound_name, "")
+    variable_cell_measures = cell_measures['cell_measures'].get(cmip7_compound_name, '')
 
     cmor.set_variable_attribute(cmortos, "cell_measures", "c", variable_cell_measures)
 

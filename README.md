@@ -2,39 +2,50 @@
 
 [![Recreate CMOR CVs JSON file](https://github.com/WCRP-CMIP/cmip7-cmor-tables/actions/workflows/recreate-cmor-cvs-json.yaml/badge.svg)](https://github.com/WCRP-CMIP/cmip7-cmor-tables/actions/workflows/recreate-cmor-cvs-json.yaml)
 
-CMOR MIP tables for use with CMOR v3.13.1 and newer versions in preparation for CMIP7.
+CMOR MIP tables for use with CMOR v3.15 and newer versions in preparation for CMIP7.
 
-Note that versions of CMOR after v3.10 will be able to use these MIP tables, but minimum version 3.13 is required to correctly output the realization, initialization, physics and forcing indices.
+Note that versions of CMOR after v3.10 will be able to use these MIP tables, but minimum version 3.14.2 is required to correctly output all global attributes, with some variables requiring v3.15.1.
+CMOR v3.14.1 removed some legacy global attributes from output files (see [release notes](https://github.com/PCMDI/cmor/releases/tag/3.14.1) for details.
+CMOR v3.14.2 prevents parent attributes from being required for experiments with no parents (see [release notes](https://github.com/PCMDI/cmor/releases/tag/3.14.2) for details.
 
-To support overriding of long names, in the very small number of cases where this is required to match the Data Request v1.2.2.3, CMOR v3.13.2 is needed and the examples here have been updated to use it.
+
+To support overriding of long names, in the very small number of cases where this is required to match the Data Request v1.2.2.3, CMOR v3.13.2 is needed, and CMOR v3.14.2 is used in the examples here.
 
 ## CVs JSON file
 
 The CVs JSON file is now hosted in the [tables-cvs directory](https://github.com/WCRP-CMIP/cmip7-cmor-tables/tree/main/tables-cvs). 
 This file will be updated around 00Z each day via a github action using the esgvoc tools. 
-Initially only two source_id entries exist for demonstration purposes, but these will be extended as the Essential Model Documentation is collected and processed. 
-An update to modelling groups will be sent in the second half of February.
 
 ⚠️ **Note that there is no intention to generate a tag/release for every update to the CVs JSON file**.⚠️
 
-A large number of changes  will be made to the CVs as new models, grids and eventually experiments are registered making this unwieldly.
+A large number of changes will be made to the CVs as new models, grids and eventually experiments are registered making this unwieldly.
 To reference a particular version of the CVs JSON file we recommend using the commit hash (e.g. 58efe39) from [here](https://github.com/WCRP-CMIP/cmip7-cmor-tables/blob/main/tables-cvs/cmor-cvs.json) and the date.
+
+### 'Split' view
+
+To assist users with seeing the available options for each CV,
+we also provide one file per CV in `tables-cvs/split-view`
+[link (main branch)](https://github.com/WCRP-CMIP/cmip7-cmor-tables/tree/main/tables-cvs/split-view).
+The information here is updated automatically and is identical to that used by CMOR
+(specifically `tables-cvs/cmor-cvs.json`),
+but it is just provided in a way that may be more convenient for some users.
 
 ## Changes relative to CMIP6
 
-With the introduction of [branded variable names](https://wcrp-cmip.github.io/cmip7-guidance/CMIP7/branded_variables/) and an updated set of [global attributes](https://zenodo.org/records/17250297) the tables here look a little different to those for CMIP6. 
+With the introduction of [branded variable names](https://wcrp-cmip.github.io/cmip7-guidance/docs/CMIP7/Branded_Variables/) and an updated set of [global attributes](https://zenodo.org/records/17250297) the tables here look a little different to those for CMIP6. 
 
 * Variables are arranged in MIP tables by realm and indexed by branded variable name.
 * Frequency is no longer defined for a specific variable and any valid frequency can be set via the input JSON file (the same is true for region).
 
 Notable changes to the input JSON file used by CMOR
-* `drs_specs` should be set to the drs_specs version this will be `MIP-DRS7.0.0.0` initially, but will be updated as changes to the data definitions are produced, e.g. new version of the Data Request.
+* `drs_specs` should be set to the drs_specs version this will be `MIP-DRS7.1.0.0` initially, but will be updated as changes to the data definitions are produced, e.g. new version of the Data Request.
 * `region` is required (usually `"glb"` for global variables, note the change in case as of Data Request v1.2.2.3) 
-* `archive_id` is `"WCRP"`
-* `frequency` must be specified and does not contain any suffixes as in CMIP6 (e.g. `6hrPt` and similar have been removed as has `1hrCM` used for the diurnal cycle diagnostics. The time sampling is now described in the [Branded Variable Name](https://wcrp-cmip.github.io/cmip7-guidance/CMIP7/branded_variables/).
+* ~`archive_id` is `"WCRP"`~ change abandoned
+* `frequency` must be specified and does not contain any suffixes as in CMIP6 (e.g. `6hrPt` and similar have been removed as has `1hrCM` used for the diurnal cycle diagnostics. The time sampling is now described in the [Branded Variable Name](https://wcrp-cmip.github.io/cmip7-guidance/docs/CMIP7/Branded_Variables/).
 * `*_index` fields are now strings and must have the appropriate prefix, e.g. `realization_index` should be `"r1"` rather than `1`
 * `tracking_prefix` has been updated with the value required for CMIP7
 * `long_name` and `cell_measures` both have separate files keyed by the CMIP7 compound names. Modelling groups are asked to use these files as shown in the example notebooks
+* `branch_method` is no longer required (requires CMOR v3.14.1)
 
 ## Changes relative to the Data Request
 
@@ -54,6 +65,11 @@ Each of these use the tables and the testing CVs JSON file
 
 * [Simple CMOR demo notebook](cmor_demo.ipynb) ([python script equivalent](scripts/cmor_test.py))
     * Get the right environment either using conda with `cmor_environment.yml` or pixi using the `pixi.lock` file
+        * If you use pixi and need to update the CMOR version,
+          simply edit `pixi.toml`,
+          then run `pixi lock`,
+          then commit the updates to `pixi.toml` and `pixi.lock`
+          and finally make a pull request back into the `main` branch if appropriate.
 * [Example of "re-cmorising" CMIP6 data](Simple_recmorise_cmip6-cmip7.ipynb)
 
 Note in particular the lines used to add `cell_measures` metadata to variables.

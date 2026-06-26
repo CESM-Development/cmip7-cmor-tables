@@ -1,8 +1,8 @@
 {
     "Header": {
-        "Conventions": "CF-1.12 CMIP-7.0",
-        "checksum": "md5: 02cbee709060bf40a61370a5bd24c91f",
-        "cmor_version": "3.13",
+        "Conventions": "CF-1.12",
+        "checksum": "md5: bcfd8e7ffabfb9e734ef1f2283a33c85",
+        "cmor_version": "3.15",
         "generic_levels": "",
         "int_missing_value": "-999",
         "missing_value": "1e20",
@@ -11,7 +11,7 @@
         "positive": "",
         "product": "model-output",
         "realm": "",
-        "table_date": "2026-01-07 10:30:23",
+        "table_date": "2026-06-22 17:37:39",
         "table_id": "grids",
         "type": "real",
         "valid_max": "",
